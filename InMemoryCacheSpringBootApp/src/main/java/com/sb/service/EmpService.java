@@ -23,7 +23,6 @@ public class EmpService {
 
 	private AtomicInteger dbCallCount = new AtomicInteger(0);
 
-	@Cacheable("saveEmp")
 	public EmpEntity saveEmp(CommonDto empDto) {
 		EmpEntity emp = new EmpEntity();
 		emp.setEname(empDto.getName());
