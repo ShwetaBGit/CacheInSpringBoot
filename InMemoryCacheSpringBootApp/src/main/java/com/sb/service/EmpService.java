@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,9 @@ public class EmpService {
 		return empRepo.save(emp);
 	}
 
-	@Cacheable(key = "#id", value = "emp", unless = "#result != null && #result.designation == 'SE'") //here it means designation 'SE' will not be cached, it will fetch from db
+	// here unless it means designation 'SE' will not be stored into cached, it will fetch from db for each request.
+	//Apart from SE designation, all will be stored into cache
+	@Cacheable(key = "#id", value = "emp", unless = "#result != null && #result.designation == 'SE'") 
 	public EmpEntity fetchEmpById(Long id) {
 		System.out.println("Hit the data from db:findById");
 		return empRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Employee not found with id: " + id));
@@ -61,6 +64,12 @@ public class EmpService {
 		existingEmp.setDepartment(empDto.getDepartment());
 		existingEmp.setExperience(empDto.getExperience());
 		return empRepo.save(existingEmp);
+	}
+
+	@CacheEvict(value = "emp", key = "#id")
+	public String removeEmp(Long id) {
+		empRepo.deleteById(id);
+		return "Emp Removed !!!";
 	}
 
 	public int getDbCallCount() {
